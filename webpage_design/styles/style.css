@@ -4,25 +4,20 @@ body {
   font-family: 'Courier New', monospace;
   color: #1a1a1a;
 }
-
 h1, h5, .navbar-brand {
   font-family: 'Oswald', sans-serif;
   letter-spacing: 1px;
 }
-
 .navbar {
   background-color: #3f51b5;
 }
-
 .navbar-brand, .nav-link {
   color: white !important;
 }
-
 .device-title {
   color: #3f51b5;
   margin-top: 1rem;
 }
-
 canvas {
   display: block;
   margin: auto;

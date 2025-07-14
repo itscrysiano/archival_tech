@@ -1,18 +1,15 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-
-function init(containerId, modelPath, audioPath) {
+export function loadDevice(containerId, modelPath, audioPath) {
   const container = document.getElementById(containerId);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(300, 300);
+  renderer.setSize(400, 400);
   container.appendChild(renderer.domElement);
 
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
   scene.add(light);
 
-  const loader = new GLTFLoader();
+  const loader = new THREE.GLTFLoader();
   let mixer, model;
 
   loader.load(modelPath, function (gltf) {
@@ -28,7 +25,6 @@ function init(containerId, modelPath, audioPath) {
   });
 
   camera.position.z = 3;
-
   const clock = new THREE.Clock();
 
   const listener = new THREE.AudioListener();
@@ -52,7 +48,3 @@ function init(containerId, modelPath, audioPath) {
   }
   animate();
 }
-
-init('cassette-container', './assets/models/cassette.glb', './assets/audio/cassette.mp3');
-init('cd-container', './assets/models/cd.glb', './assets/audio/cd.mp3');
-init('ipod-container', './assets/models/ipod.glb', './assets/audio/ipod.mp3');
