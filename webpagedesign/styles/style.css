@@ -1,0 +1,170 @@
+
+/* text css */
+body {
+  background-color: #e6f2ff;
+  font-family: 'Courier New', monospace;
+  color: #1a1a1a;
+}
+h1, h5, .navbar-brand {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px;
+}
+
+/* navigation menu css */
+.navbar {
+  background-color: #3f51b5;
+}
+.navbar-brand, .nav-link {
+  color: #ffffff !important;
+}
+.device-title {
+  color: #3f51b5;
+  margin-top: 1rem;
+}
+
+.dropdown-menu {
+    text-align: -webkit-left;
+    background-color: #3f51b5;
+    margin-top: 20px; /* Experiment to move the dropdown menu down */
+    min-width: auto !important;
+    width: fit-content !important;
+}
+
+.dropdown-menu
+.dropdown-item {
+    color: #ffffff; 
+}
+
+.dropdown-menu
+.dropdown-item:hover {
+    color: #030303;
+    background-color: #ACC0C6;
+}
+
+/* body css*/ 
+canvas {
+  display: block;
+  margin: auto;
+  border: 2px solid #ccc;
+  background-color: #fff;
+}
+
+/* CSS rule to style the footer */
+.footer {
+    color: #FFF;
+    background-color: #760003;
+    height: 50px;
+}
+
+.navbar-text > a {
+    color: rgb(255, 255, 255);
+    font-size: 8px;
+    text-decoration: none;
+}
+
+.navbar-text > p {
+    color: rgb(64, 228, 15);
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.copyright {
+    padding-top: 13px;
+}
+
+.social {
+    padding-top: 0px;
+}
+
+/* ipod css */
+#ipod-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 500px;
+  height: 500px;
+  pointer-events: auto;
+  border-radius: 5%;
+  overflow: hidden;
+  color: white;
+  font-family: 'Helvetica Neue', sans-serif;
+  z-index: 10;
+}
+
+.song-list {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  padding: 40px;
+}
+
+#ipod-container {
+  position: relative;
+  width: 400px; /* match your renderer */
+  height: 400px;
+}
+
+#threejs-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#ipod-ui {
+  position: absolute;
+  top: 24.5%;   /* Adjust this value */
+  left: 23.5%;  /* Adjust this value */
+  width: 53%;   /* Match screen bounds */
+  height: 26.5%;
+  background-color: #e9f5ff;
+  border: 2px solid #333;
+  font-family: 'Open Sans', sans-serif;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.top-bar {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.85em;
+}
+
+.song-info {
+  display: flex;
+  margin-top: 5px;
+}
+
+.cover {
+  width: 35%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  margin-right: 5px;
+}
+
+.text-info {
+  font-size: 0.7em;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #ccc;
+  margin-top: 4px;
+  position: relative;
+}
+
+.progress {
+  width: 70%;
+  height: 100%;
+  background: #0a74da;
+}
+
+.timestamps {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65em;
+  margin-top: 2px;
+}
+
+#threeContainer {
+  width: 100%;
+  height: 60vh; /* or 80vh / 100vh depending on how much space you want it to take */
+  display: block;
+}
