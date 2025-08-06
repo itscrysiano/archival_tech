@@ -1,37 +1,33 @@
- var renderer, clock, mixer;
-  let loadedModel;
+ let renderer, clock, mixer, camera, scene;
+let loadedModel;
 
-  const canvas = document.getElementById('threeContainer');
+const canvas = document.getElementById('threeContainer');
 
-  // Resize function definition
-  function resize() {
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    renderer.setSize(width, height);
-  }
+// Clock for animation (if needed)
+clock = new THREE.Clock();
 
-  // Initialize renderer
-  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  resize(); // Now this works
+// Set up the renderer
+renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Scene and camera
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-  camera.position.set(0, 0, 10.000);
-  camera.rotation.set(0, 0, 0)
+// Create scene
+scene = new THREE.Scene();
 
-  // OrbitControls
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  camera.position.set(0, 0, 10)
-  controls.target.set(0, 0, 0);
-  controls.update();
+// Set up the camera
+camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 10);
 
-  // Lighting
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-  scene.add(light);
+// Controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.update();
 
-  // Load model
+// Lighting
+const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+scene.add(light);
+
+// Load model
   const loader = new THREE.GLTFLoader();
   loader.load(
     'assets/models/ipod3.glb',
@@ -50,18 +46,30 @@
       console.error('Model loading error:', error);
     }
   );
+// Resize handler
+function onWindowResize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-  // Animation loop
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+// Attach the resize event
+window.addEventListener('resize', onWindowResize, false);
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Update animation if any
+  if (mixer) {
+    mixer.update(clock.getDelta());
   }
-  animate();
 
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    resize();
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
-  });
+  renderer.render(scene, camera);
+}
 
+// Start the animation loop
+animate();
