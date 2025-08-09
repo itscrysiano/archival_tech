@@ -69,20 +69,20 @@ scene.add(light);
     });
 
   // Audio
-  function setupAudio(path) {
+  const listener = new THREE.AudioListener();
+camera.add( listener );
 
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
+// create a global audio source
+const sound = new THREE.Audio( listener );
 
-    const audioLoader = new THREE.AudioLoader();
-    audio = new THREE.Audio(listener);
-
-    audioLoader.load(path, buffer => {
-      audio.setBuffer(buffer);
-      audio.setLoop(false);
-      audio.setVolume(0.8);
-    });
-  }
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( 'assets/audio/you-rock-my-world.mp3', function( buffer ) {
+	sound.setBuffer( buffer );
+	sound.setLoop( false );
+	sound.setVolume( 0.5 );
+	sound.play();
+});
     
     undefined,
     function(error) {
