@@ -1,12 +1,14 @@
 let renderer, clock, mixer, camera, scene;
 let loadedModel;
-let iPod, screenMesh, audio;
+let iPod, screenMesh;
 let clickableButtons = [];
 
-let currentTrack = 0;
-const songs = ['assets/audio/you-rock-my-world.mp3', 'assets/audio/crazy-in-love.mp3'];
-const screens = ['assets/screens/rock-my-world-michael-jackson.png', 'assets/screens/crazy-in-love-beyonce.png'];
-
+const playlist = [
+   { url: 'assets/audio/you-rock-my-world.mp3', title: 'You Rock My World', art: 'assets/screens/rock-my-world-michael-jackson.png' },
+  { url: 'assets/audio/crazy-in-love.mp3',      title: 'Crazy in Love',    art: 'assets/screens/crazy-in-love-beyonce.png' },
+  { url: 'assets/audio/dance-dance.mp3', title: 'Dance Dance', art: 'assets/screens/dance dance-fall out boy.png' },
+];
+let current = 0;
 
 const canvas = document.getElementById('threeContainer');
 
@@ -21,7 +23,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 // Create scene
 scene = new THREE.Scene();
 
-// Set up the camera
+// Camera
 camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 0, 10);
 
@@ -33,6 +35,63 @@ controls.update();
 // Lighting
 const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
 scene.add(light);
+
+// Audio 
+const listener = new THREE.AudioListener();
+camera.add( listener );
+const player = new THREE.Audio( listener );
+const audioLoader = new THREE.AudioLoader();
+
+//WebAudio user gesture
+window.addEventListener('pointerdown',() => {
+  if (listener.context.state !== 'running') listener.context.resume();
+}, { once: true});
+
+const bufferCache = new Map();
+
+function setAndMaybePlay(buffer, autoplay) {
+  if (player && player.buffer) player.stop();
+  player.setBuffer(buffer);
+  player.setLoop(false);
+  player.setVolume(0.75);
+  if (autoplay) player.play();
+  };
+
+function loadTrack(index, autoplay = false) {
+  current = (index + playlist.length) % playlist.length;
+  const { url, art } = playlist[current];
+
+  updateScreenTexture(art);
+
+  if (bufferCache.has(url)) {
+    setAndMaybePlay(bufferCache.get(url), autoplay);
+  } else {
+    audioLoader.load(url, (buffer) => {
+      bufferCache.set(url, buffer);
+      setAndMaybePlay(buffer, autoplay);
+    });
+  }
+}
+
+//Audio Controller
+function playPause() {
+  if (!player.buffer) return loadTrack(current, true);
+  if (player.isPlaying) player.pause(); else player.play();
+}
+function nextTrack() { loadTrack(current + 1, true); }
+function prevTrack() { loadTrack(current - 1, true); }
+
+//Buttons
+document.getElementById('playPauseBtn')?.addEventListener('click', playPause);
+document.getElementById('nextBtn')?.addEventListener('click', nextTrack);
+document.getElementById('prevBtn')?.addEventListener('click', prevTrack);
+
+//Keyboard
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); playPause(); }
+  if (e.code === 'ArrowRight') nextTrack();
+  if (e.code === 'ArrowLeft') prevTrack();
+})
 
 
 // Load model
@@ -63,33 +122,16 @@ scene.add(light);
         }
       });
 
-      updateScreenTexture(screens[currentTrack]);
-      setupAudio(songs[currentTrack]);
+      updateScreenTexture(playlist[current].art);
 
     });
 
-  // Audio
-  const listener = new THREE.AudioListener();
-camera.add( listener );
-
-// create a global audio source
-const sound = new THREE.Audio( listener );
-
-// load a sound and set it as the Audio object's buffer
-const audioLoader = new THREE.AudioLoader();
-audioLoader.load( 'assets/audio/you-rock-my-world.mp3', function( buffer ) {
-	sound.setBuffer( buffer );
-	sound.setLoop( false );
-	sound.setVolume( 0.5 );
-	sound.play();
-});
-    
     undefined,
     function(error) {
       console.error('Model loading error:', error);
     };
 
-  // Texture and Materials
+// Texture and Materials
 function updateScreenTexture(imagePath) {
   const loader = new THREE.TextureLoader ();
   loader.load(imagePath, texture => {
