@@ -1,14 +1,29 @@
 
-/* text css */
-body {
-  background-color: #e6f2ff;
-  font-family: 'Courier New', monospace;
-  color: #1a1a1a;
+/* fonts and colors */
+:root{
+  --font-body: "Open Sans", sans-serif;
+  --font-heading: "Helvetica Neue", sans-serif;
+
+  --bg: #e6f2ff;
+  --ink: #1a1a1a;
+  --brand: #3f51b5;
+  --shadow: 0 12px 28px rgba(0,0,0,.08);
+  --radius: 10px;
+
+
+  /* make Bootstrap use our body font */
+  --bs-body-font-family: var(--font-body);
 }
-h1, h5, .navbar-brand {
-  font-family: 'Oswald', sans-serif;
-  letter-spacing: 1px;
+
+/* heading */
+h1, h2, h3, h4, h5, h6,
+.navbar-brand {
+  font-family: "Open Sans", sans-serif, light;
+  letter-spacing: .035em;
+  font-weight: 400;
+  margin: 0;
 }
+
 
 /* navigation menu css */
 .navbar {
@@ -49,23 +64,24 @@ canvas {
   background-color: #fff;
 }
 
+.cardModel{
+  background: var(--card);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+}
+.cardModel h3{
+  font-family: "Open Sans", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 100;
+}
+
 /* CSS rule to style the footer */
 .footer {
     color: #FFF;
     background-color: #760003;
     height: 50px;
-}
-
-.navbar-text > a {
-    color: rgb(255, 255, 255);
-    font-size: 8px;
-    text-decoration: none;
-}
-
-.navbar-text > p {
-    color: rgb(64, 228, 15);
-    font-size: 15px;
-    text-decoration: none;
 }
 
 .copyright {
@@ -76,93 +92,6 @@ canvas {
     padding-top: 0px;
 }
 
-/* ipod css */
-#ipod-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 500px;
-  height: 500px;
-  pointer-events: auto;
-  border-radius: 5%;
-  overflow: hidden;
-  color: white;
-  font-family: 'Helvetica Neue', sans-serif;
-  z-index: 10;
-}
-
-.song-list {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  padding: 40px;
-}
-
-#ipod-container {
-  position: relative;
-  width: 400px; /* match your renderer */
-  height: 400px;
-}
-
-#threejs-canvas {
-  width: 100%;
-  height: 100%;
-}
-
-*#ipod-ui {
-  position: absolute;
-  top: 24.5%;   /* Adjust this value */
-  left: 23.5%;  /* Adjust this value */
-  width: 53%;   /* Match screen bounds */
-  height: 26.5%;
-  background-color: #e9f5ff;
-  border: 2px solid #333;
-  font-family: 'Helvetica Neue', sans-serif;
-  padding: 6px;
-  box-sizing: border-box;
-}
-
-.top-bar {
-  text-align: center;
-  font-weight: bold;
-  font-size: 0.85em;
-}
-
-.song-info {
-  display: flex;
-  margin-top: 5px;
-}
-
-.cover {
-  width: 35%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  margin-right: 5px;
-}
-
-.text-info {
-  font-size: 0.7em;
-}
-
-.progress-bar {
-  height: 6px;
-  background: #ccc;
-  margin-top: 4px;
-  position: relative;
-}
-
-.progress {
-  width: 70%;
-  height: 100%;
-  background: #0a74da;
-}
-
-.timestamps {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.65em;
-  margin-top: 2px;
-}
-
 #threeContainer {
   width: 100%;
   max-width: 500px;
@@ -171,3 +100,38 @@ canvas {
   display: block;
   margin: 0 auto;
 }
+
+
+button {
+ margin: 0.5rem;
+ }
+
+/* Reset Bootstrap look and make it “image-only” */
+.img-btn{
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
+  margin: 0 .25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.img-btn img{
+  width: 28px;        /* adjust size */
+  height: 28px;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Hover/active/focus states */
+.img-btn:hover { background: rgba(0,0,0,.05); }
+.img-btn:active { transform: translateY(1px); }
+.img-btn:focus-visible { outline: 2px solid #0078D4; outline-offset: 2px; }
+
+/* If your icons are PNGs and look too dark/light, you can add filters:
+.img-btn img:hover { filter: brightness(0) invert(1); }  // example for dark->light
+*/
