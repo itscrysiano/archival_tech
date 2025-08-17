@@ -106,32 +106,4 @@ button {
  margin: 0.5rem;
  }
 
-/* Reset Bootstrap look and make it “image-only” */
-.img-btn{
-  background: transparent;
-  border: none;
-  padding: 0.35rem;
-  margin: 0 .25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  cursor: pointer;
-}
 
-.img-btn img{
-  width: 28px;        /* adjust size */
-  height: 28px;
-  display: block;
-  -webkit-user-drag: none;
-  user-select: none;
-}
-
-/* Hover/active/focus states */
-.img-btn:hover { background: rgba(0,0,0,.05); }
-.img-btn:active { transform: translateY(1px); }
-.img-btn:focus-visible { outline: 2px solid #0078D4; outline-offset: 2px; }
-
-/* If your icons are PNGs and look too dark/light, you can add filters:
-.img-btn img:hover { filter: brightness(0) invert(1); }  // example for dark->light
-*/

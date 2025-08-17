@@ -82,9 +82,29 @@ function nextTrack() { loadTrack(current + 1, true); }
 function prevTrack() { loadTrack(current - 1, true); }
 
 //Buttons
-document.getElementById('playPauseBtn')?.addEventListener('click', playPause);
-document.getElementById('nextBtn')?.addEventListener('click', nextTrack);
-document.getElementById('prevBtn')?.addEventListener('click', prevTrack);
+//document.getElementById('playPauseBtn')?.addEventListener('click', playPause);
+//document.getElementById('nextBtn')?.addEventListener('click', nextTrack);
+//document.getElementById('prevBtn')?.addEventListener('click', prevTrack);
+
+// UI wiring for PNG buttons 
+function updatePPIcon() {
+  const icon = document.getElementById('playPauseIcon');
+  if (!icon) return;
+  const playing = !!(player && player.isPlaying);
+  icon.src = playing ? 'assets/buttons/playpause.png' : 'assets/buttons/playpause.png';
+  icon.dataset.state = playing ? 'playing' : 'paused';
+}
+
+// Hook up transport buttons once DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  const byId = (id) => document.getElementById(id);
+
+  byId('menuBtn')     ?.addEventListener('click', () => console.log('Menu'));
+  byId('prevBtn')     ?.addEventListener('click', () => { prevTrack(); updatePPIcon(); });
+  byId('playPauseBtn')?.addEventListener('click', () => { playPause();  updatePPIcon(); });
+  byId('nextBtn')     ?.addEventListener('click', () => { nextTrack();  updatePPIcon(); });
+});
+
 
 //Keyboard
 window.addEventListener('keydown', (e) => {
@@ -159,7 +179,7 @@ window.addEventListener('click', (event) => {
     const clicked = intersects[0].object;
     const buttonName = clicked.parent.name.toLowerCase();
 
-    switch(buttonNameName){
+    switch(buttonName){
       case 'playbutton':
         if (audio.isPlaying) {
           audio.pause();

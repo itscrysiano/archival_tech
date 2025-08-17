@@ -58,7 +58,7 @@
     <div class="row justify-content-center">
       <div class="col-12 col-md-10">
         <div class="card cardModel text-justify">
-          <div class="card-header bg-white border-bottom-0">
+          <div class="card-header bg-white border-bottom-2">
             <p>The iPod Classic emerged during a transformative era for Apple, fondly called the iYears. It was more than just a music player. The iPod Classic changed how we experienced music.</p>
              <p>First released in 2001, it went through six generations before the final model arrived in 2007 with 160 GB of space and the distinctive click wheel. It was discontinued in 2014, but its influence has never really faded. People still hold onto it for more than its storage or design; it carries a certain technostalgia about it.</p>
              <p>Rediscover the iPod Classic.</p>
@@ -77,25 +77,43 @@
 
   <hr>
 
-  <!-- Main Content -->
-  <div class="container-fluid main-contents my-4">
+    <div class="container-fluid main-contents my-4">
     <div class="row justify-content-center">
       <div class="col-12 col-md-10">
         <div class="card cardModel text-center">
-          <div class="card-header bg-white border-bottom-0">
+          <div class="card-header bg-white border-bottom-2">
           </div>
           <div class="card-body">
-              <button id="menuBtn" class="btn btn-outline-primary">Menu</button>
-              <button id="prevBtn" class="btn btn-outline-danger">Prev</button>
-               <button type="button" class="img-btn" id="prevBtn" aria-label="Previous"><img src="buttons/rewind.png" alt=""></button>
-              <button id="playPauseBtn" class="btn btn-outline-secondary">Play/Pause</button>
-              <button id="nextBtn" class="btn btn-outline-success">Next</button>
-            </div>
+  <!-- Transport bar -->
+<div id="trackControls" class="transport" aria-label="Playback controls">
+  <button type="button" class="img-btn" id="menuBtn" aria-label="Menu">
+    <img src="assets/buttons/menu.png" alt="" width="50" height="50">
+  </button>
+
+  <button type="button" class="img-btn" id="prevBtn" aria-label="Previous">
+    <img src="assets/buttons/rewind.png" alt="" width="50" height="50">
+  </button>
+
+  <button type="button" class="img-btn" id="playPauseBtn" aria-label="Play/Pause">
+    <!-- give the img an id so we can swap it in JS -->
+    <img id="playPauseIcon"
+         src="assets/buttons/playpause.png"
+         alt=""
+         width="50" height="50"
+         data-state="paused">
+  </button>
+
+  <button type="button" class="img-btn" id="nextBtn" aria-label="Next">
+    <img src="assets/buttons/forward.png" alt="" width="50" height="50">
+  </button>
+</div>
+  </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/106/three.min.js'></script>
 <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/2666677/OrbitControls.js'></script>
