@@ -106,4 +106,53 @@ button {
  margin: 0.5rem;
  }
 
+ :root{
+  --brand: #3b4cca;  /* same as your navbar */
+  --nav-h: 64px;     /* adjust if your navbar is taller/shorter */
+}
 
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: #000;      /* black page */
+  color: #fff;           /* white text */
+}
+
+/* Centers the block in the remaining viewport below the navbar */
+.center-viewport{
+  min-height: calc(100vh - var(--nav-h));
+  display: grid;
+  place-items: center;   /* centers both horizontally & vertically */
+  text-align: center;
+  gap: 24px;
+  padding: 16px;
+}
+
+/* Title spacing/weight */
+.landing-title{
+  margin: 0;
+  letter-spacing: .02em;
+}
+
+/* Buttons match navbar color and are centered as a row */
+.landing-actions{
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-brand{
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #3b4cca;
+  padding: .75rem 2.25rem;
+  border-radius: .5rem;
+  font-weight: 600;
+}
+.btn-brand:hover,
+.btn-brand:focus{
+  filter: brightness(1.08);
+  color: #fff;
+  border-color: var(--brand);
+}

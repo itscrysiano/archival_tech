@@ -1,16 +1,22 @@
 let renderer, clock, mixer, camera, scene;
 let loadedModel;
-let iPod, screenMesh;
+let iPod;
 let clickableButtons = [];
+let screenMeshes = [];
+
+const MENU_MODEL = 'assets/models/ipodMenu.glb';
 
 const playlist = [
-   { url: 'assets/audio/you-rock-my-world.mp3', title: 'You Rock My World', art: 'assets/screens/rock-my-world-michael-jackson.png' },
-  { url: 'assets/audio/crazy-in-love.mp3',      title: 'Crazy in Love',    art: 'assets/screens/crazy-in-love-beyonce.png' },
-  { url: 'assets/audio/dance-dance.mp3', title: 'Dance Dance', art: 'assets/screens/dance dance-fall out boy.png' },
+   { url: 'assets/audio/you-rock-my-world.mp3', title: 'You Rock My World', model: 'assets/models/ipodMichael.glb' },
+  { url: 'assets/audio/crazy-in-love.mp3',      title: 'Crazy in Love',    model: 'assets/models/ipodBeyonce.glb' },
+  { url: 'assets/audio/dance-dance.mp3', title: 'Dance Dance', model: 'assets/models/ipodFallout.glb' },
 ];
 let current = 0;
 
 const canvas = document.getElementById('threeContainer');
+
+const texLoader = new THREE.TextureLoader();
+
 
 // Clock for animation (if needed)
 clock = new THREE.Clock();
@@ -36,13 +42,15 @@ controls.update();
 const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
 scene.add(light);
 
+// 
+
 // Audio 
 const listener = new THREE.AudioListener();
 camera.add( listener );
 const player = new THREE.Audio( listener );
 const audioLoader = new THREE.AudioLoader();
 
-//WebAudio user gesture
+// WebAudio
 window.addEventListener('pointerdown',() => {
   if (listener.context.state !== 'running') listener.context.resume();
 }, { once: true});
@@ -59,9 +67,7 @@ function setAndMaybePlay(buffer, autoplay) {
 
 function loadTrack(index, autoplay = false) {
   current = (index + playlist.length) % playlist.length;
-  const { url, art } = playlist[current];
-
-  updateScreenTexture(art);
+  const { url } = playlist[current];
 
   if (bufferCache.has(url)) {
     setAndMaybePlay(bufferCache.get(url), autoplay);
@@ -81,12 +87,9 @@ function playPause() {
 function nextTrack() { loadTrack(current + 1, true); }
 function prevTrack() { loadTrack(current - 1, true); }
 
-//Buttons
-//document.getElementById('playPauseBtn')?.addEventListener('click', playPause);
-//document.getElementById('nextBtn')?.addEventListener('click', nextTrack);
-//document.getElementById('prevBtn')?.addEventListener('click', prevTrack);
 
-// UI wiring for PNG buttons 
+
+// PNG buttons UI
 function updatePPIcon() {
   const icon = document.getElementById('playPauseIcon');
   if (!icon) return;
@@ -106,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-//Keyboard
+// Keyboard
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space') { e.preventDefault(); playPause(); }
   if (e.code === 'ArrowRight') nextTrack();
@@ -127,6 +130,10 @@ window.addEventListener('keydown', (e) => {
 
       scene.add(loadedModel);
 
+      // TEMP: list all mesh object names so you can copy the screen's exact name
+loadedModel.traverse(o => { if (o.isMesh) console.log('MESH:', o.name, 'MAT:', o.material?.name); });
+
+
       screenMesh = loadedModel.getObjectByName('imageTexture');
       if (screenMesh && screenMesh.type === 'Group') {
         screenMesh.traverse(child => {
@@ -135,6 +142,7 @@ window.addEventListener('keydown', (e) => {
           }
         })
       }
+      
 
       loadedModel.traverse(child => {
         if (child.name.toLowerCase().includes("button")) {
@@ -151,8 +159,9 @@ window.addEventListener('keydown', (e) => {
       console.error('Model loading error:', error);
     };
 
+
 // Texture and Materials
-function updateScreenTexture(imagePath) {
+  function updateScreenTexture(imagePath) {
   const loader = new THREE.TextureLoader ();
   loader.load(imagePath, texture => {
     if (screenMesh && screenMesh.material) {
@@ -161,7 +170,7 @@ function updateScreenTexture(imagePath) {
     } else {
     console.warn('screenMesh or its material no found.');
   }
-  });
+  }); 
 }
 
 // Raycasting Logic
