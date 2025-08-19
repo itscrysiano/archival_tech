@@ -278,10 +278,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Keyboard
 window.addEventListener('keydown', async (e) => {
-  if (e.code === 'Space') { e.preventDefault(); await cycle(+1, true); }
-  if (e.code === 'ArrowRight') await cycle(+1, true);
-  if (e.code === 'ArrowLeft')  await cycle(-1, true);
+  // don’t hijack typing in inputs
+  const tag = (e.target && e.target.tagName) || '';
+  if (/(INPUT|TEXTAREA|SELECT|BUTTON)/.test(tag)) return;
+
+  if (e.code === 'Space') {
+    e.preventDefault(); // prevent page from scrolling
+    if (inMenu) {
+      await loadModelAtIndex(current); // load first song model (current=0 initially)
+      inMenu = false;
+      loadTrack(current, true);        // start audio
+    } else {
+      if (!player.buffer) {
+        loadTrack(current, true);      // first play on a song model
+      } else if (player.isPlaying) {
+        player.pause();
+      } else {
+        player.play();
+      }
+    }
+    updatePPIcon();
+  } else if (e.code === 'ArrowRight') {
+    e.preventDefault();
+    await cycle(+1, true);
+  } else if (e.code === 'ArrowLeft') {
+    e.preventDefault();
+    await cycle(-1, true);
+  }
 });
+
 
 // Raycasting Logic
 const raycaster = new THREE.Raycaster();
