@@ -8,7 +8,7 @@ const MENU_MODEL  = 'assets/models/vinylPlayer2.glb';        // your menu “spl
 const VINYL_MODEL = 'assets/models/vinylPlayer2.glb'; // your turntable model
 
 // --- Single Track ---
-const TRACK_URL = 'assets/audio/never-too-much.mp3';
+const TRACK_URL = 'assets/audio/never-too-much-luther-van.mp3';
 
 // --- Canvas / Clock / Renderer ---
 const canvas = document.getElementById('threeContainer');
