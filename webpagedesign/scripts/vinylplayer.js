@@ -1,66 +1,77 @@
-let renderer, clock, mixer, camera, scene;
+// --- Core THREE globals ---
+let renderer, clock, camera, scene, mixer;
 let loadedModel;
-let screenMesh;
-let clickableButtons = [];
-let inMenu = true;   
+let inMenu = true;
 
+// --- Models ---
+const MENU_MODEL  = 'assets/models/vinylPlayer2.glb';        // your menu “splash”
+const VINYL_MODEL = 'assets/models/vinylPlayer2.glb'; // your turntable model
 
+// --- Single Track ---
+const TRACK_URL = 'assets/audio/never-too-much.mp3';
 
-const MENU_MODEL = 'assets/models/ipodMenu.glb';
-
-const playlist = [
-  { url: 'assets/audio/you-rock-my-world.mp3', title: 'You Rock My World', model: 'assets/models/ipodMichael.glb', art: 'assets/screens/rock-my-world-michael-jackson.png' },
-  { url: 'assets/audio/crazy-in-love.mp3',      title: 'Crazy in Love',    model: 'assets/models/ipodBeyonce.glb', art:'assets/screens/crazy-in-love-beyonce.png' },
-  { url: 'assets/audio/dance-dance.mp3', title: 'Dance Dance', model: 'assets/models/ipodFallout.glb', art:'assets/screens/dance dance-fall out boy.png' },
-];
-let current = 0;
-
+// --- Canvas / Clock / Renderer ---
 const canvas = document.getElementById('threeContainer');
-
-// Clock 
 clock = new THREE.Clock();
 
-// Renderer
-renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-// Scene
+// --- Scene / Camera / Controls ---
 scene = new THREE.Scene();
 
-// Camera
 camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 0, 10);
 
-// Controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.update();
 
-// Lighting
-const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-scene.add(light);
+// --- Light ---
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
 
-// Audio 
-const listener = new THREE.AudioListener();
+// --- Audio ---
+const listener    = new THREE.AudioListener();
 camera.add(listener);
-const player = new THREE.Audio(listener);
+const player      = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-
-// WebAudio
-window.addEventListener('pointerdown', () => {
-  if (listener.context.state !== 'running') listener.context.resume();
-}, { once: true});
 
 const bufferCache = new Map();
 
-function setAndMaybePlay(buffer, autoplay) {
-  // stop only if actually playing
-  if (player && player.isPlaying && player.source) player.stop();
+// Make sure WebAudio can play after first user gesture
+window.addEventListener('pointerdown', () => {
+  if (listener.context.state !== 'running') listener.context.resume();
+}, { once: true });
 
+// --- Helpers ---
+function disposeObject3D(obj) {
+  obj.traverse((o) => {
+    if (o.isMesh) {
+      o.geometry?.dispose?.();
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach((m) => {
+        m.map?.dispose?.();
+        m.emissiveMap?.dispose?.();
+        m.normalMap?.dispose?.();
+        m.dispose?.();
+      });
+    }
+  });
+}
+
+function centerModel(root) {
+  const box = new THREE.Box3().setFromObject(root);
+  const center = box.getCenter(new THREE.Vector3());
+  root.position.sub(center);
+}
+
+// --- Audio control ---
+function setAndMaybePlay(buffer, autoplay) {
+  if (player.isPlaying && player.source) player.stop();
   player.setBuffer(buffer);
   player.setLoop(false);
-  player.setVolume(0.75);
+  player.setVolume(0.85);
 
   if (autoplay) {
     if (listener.context.state !== 'running') listener.context.resume();
@@ -68,318 +79,167 @@ function setAndMaybePlay(buffer, autoplay) {
   }
 }
 
-function loadTrack(index, autoplay = false) {
-  current = (index + playlist.length) % playlist.length;
-  const { url } = playlist[current];
-
-  if (bufferCache.has(url)) {
-    setAndMaybePlay(bufferCache.get(url), autoplay);
+function loadTrack(autoplay = false) {
+  if (bufferCache.has(TRACK_URL)) {
+    setAndMaybePlay(bufferCache.get(TRACK_URL), autoplay);
   } else {
-    audioLoader.load(url, (buffer) => {
-      bufferCache.set(url, buffer);
+    audioLoader.load(TRACK_URL, (buffer) => {
+      bufferCache.set(TRACK_URL, buffer);
       setAndMaybePlay(buffer, autoplay);
     });
   }
 }
 
+// --- Model loading ---
+const gltfLoader = new THREE.GLTFLoader();
 
-function nextTrack() { loadTrack(current + 1, true); }
-function prevTrack() { loadTrack(current - 1, true); }
-
-// Load model
-  const gltfLoader = new THREE.GLTFLoader();
-
-// dispose helpers to avoid leaks when swapping models
-function disposeObject3D(obj) {
-  obj.traverse((o) => {
-    if (o.isMesh) {
-      o.geometry?.dispose?.();
-      if (o.material) {
-        const mats = Array.isArray(o.material) ? o.material : [o.material];
-        mats.forEach((m) => {
-          if (m.map) m.map.dispose?.();
-          if (m.emissiveMap) m.emissiveMap.dispose?.();
-          if (m.normalMap) m.normalMap.dispose?.();
-          m.dispose?.();
-        });
-      }
-    }
-  });
-}
-
-// Center a model at origin
-function centerModel(root) {
-  const box = new THREE.Box3().setFromObject(root);
-  const center = box.getCenter(new THREE.Vector3());
-  root.position.sub(center);
-}
-
-// try to find a "screen" mesh by common names; fallback to first mesh
-function findScreenMesh(root) {
-  const candidates = ['imageTexture', 'Screen', 'screen', 'LCD', 'lcd'];
-  for (const name of candidates) {
-    const node = root.getObjectByName(name);
-    if (node) {
-      if (node.isMesh) return node;
-      let found = null;
-      node.traverse((c) => { if (!found && c.isMesh) found = c; });
-      if (found) return found;
-    }
+async function loadModel(path) {
+  // remove previous
+  if (loadedModel) {
+    scene.remove(loadedModel);
+    disposeObject3D(loadedModel);
+    loadedModel = null;
   }
-  let anyMesh = null;
-  root.traverse((c) => { if (!anyMesh && c.isMesh) anyMesh = c; });
-  return anyMesh; // fallback if nothing named matched
-}
 
-function updateScreenTexture(imagePath) {
-  if (!imagePath) return;
-  const loader = new THREE.TextureLoader();
-  loader.load(imagePath, (texture) => {
-    if (screenMesh && screenMesh.material) {
-      if (!screenMesh.material.map) {
-        screenMesh.material.map = texture;
-      } else {
-        screenMesh.material.map.dispose?.();
-        screenMesh.material.map = texture;
-      }
-      screenMesh.material.needsUpdate = true;
-    } else {
-      // no dedicated screen; silently ignore
-    }
+  return new Promise((resolve, reject) => {
+    gltfLoader.load(
+      path,
+      (gltf) => {
+        loadedModel = gltf.scene;
+        centerModel(loadedModel);
+        scene.add(loadedModel);
+        frameObject(loadedModel);
+
+
+        resolve();
+      },
+      undefined,
+      reject
+    );
   });
 }
 
-// Menu model loader 
 async function loadMenuModel() {
-  // remove previous model if present
-  if (loadedModel) {
-    scene.remove(loadedModel);
-    disposeObject3D(loadedModel);
-    loadedModel = null;
-    screenMesh = null;
-  }
-
-  return new Promise((resolve, reject) => {
-    gltfLoader.load(
-      MENU_MODEL,
-      (gltf) => {
-        loadedModel = gltf.scene;
-        centerModel(loadedModel);
-        scene.add(loadedModel);
-
-        // rebuild clickable buttons for the menu model
-        clickableButtons.length = 0;
-        loadedModel.traverse((child) => {
-          if (child.name?.toLowerCase().includes('button')) clickableButtons.push(child);
-        });
-
-        inMenu = true;
-        resolve();
-      },
-      undefined,
-      (err) => reject(err)
-    );
-  });
+  await loadModel(MENU_MODEL);
+  inMenu = true;
 }
 
-// Model loader for the songs
-function loadModelAtIndex(index) {
-  const safeIndex = (index + playlist.length) % playlist.length;
-  const { model, art } = playlist[safeIndex];
-
-  // remove previous model if present
-  if (loadedModel) {
-    scene.remove(loadedModel);
-    disposeObject3D(loadedModel);
-    loadedModel = null;
-    screenMesh = null;
-  }
-
-  return new Promise((resolve, reject) => {
-    gltfLoader.load(
-      model,
-      (gltf) => {
-        loadedModel = gltf.scene;
-        centerModel(loadedModel);
-        scene.add(loadedModel);
-
-        // (optional) rebuild button list
-        clickableButtons.length = 0;
-        loadedModel.traverse((child) => {
-          if (child.name?.toLowerCase().includes('button')) clickableButtons.push(child);
-        });
-
-        screenMesh = findScreenMesh(loadedModel);
-        updateScreenTexture(art);
-
-        resolve();
-      },
-      undefined,
-      (err) => reject(err)
-    );
-  });
-}
-
-// Cycle both model and audio together
-async function cycle(delta = 1, autoplayAudio = true) {
-  current = (current + delta + playlist.length) % playlist.length;
-  await loadModelAtIndex(current);
+async function loadVinylModelAndPlay(startPlayback = true) {
+  await loadModel(VINYL_MODEL);
   inMenu = false;
-  loadTrack(current, autoplayAudio);
-  updatePPIcon();
+  loadTrack(startPlayback);
+}
+
+function frameObject(object, fitOffset = 1.2) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  // Set controls target
+  controls.target.copy(center);
+  controls.update();
+
+  // Compute distance from FOV
+  const maxSize = Math.max(size.x, size.y, size.z);
+  const fitHeightDistance = maxSize / (2 * Math.tan((camera.fov * Math.PI) / 360));
+  const fitWidthDistance  = fitHeightDistance / camera.aspect;
+  const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance);
+
+  // Move camera on its current direction toward the target
+  const dir = new THREE.Vector3()
+    .subVectors(camera.position, controls.target)
+    .normalize()
+    .multiplyScalar(distance);
+  camera.position.copy(controls.target).add(dir);
+
+  camera.near = distance / 50;
+  camera.far  = distance * 50;
+  camera.updateProjectionMatrix();
+
+  // If your model sits on the ground, you can add a slight upward offset here if desired
 }
 
 
-// PNG buttons UI
-function updatePPIcon() {
+// --- UI wiring ---
+function updatePlayPauseIcon() {
   const icon = document.getElementById('playPauseIcon');
   if (!icon) return;
-  const playing = !!(player && player.isPlaying);
-  icon.src = playing ? 'assets/buttons/playpause.png' : 'assets/buttons/playpause.png';
+  const playing = !!player.isPlaying;
+  // Use the same asset if you don’t have separate icons yet
+  icon.src = 'assets/buttons/playpause.png';
   icon.dataset.state = playing ? 'playing' : 'paused';
 }
 
-//Hook up transport buttons once DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  const byId = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-  byId('menuBtn')?.addEventListener('click', async () => {
+  // MENU: go back to menu model and pause audio
+  $('menuBtn')?.addEventListener('click', async () => {
     await loadMenuModel();
     if (player.isPlaying) player.pause();
-    updatePPIcon();
+    updatePlayPauseIcon();
   });
 
-  byId('menuBtn')     ?.addEventListener('click', () => console.log('Menu'));
-  byId('prevBtn')     ?.addEventListener('click', async () => { await cycle(-1, true); });
-
-
-  byId('playPauseBtn')?.addEventListener('click', async () => {
-  if (inMenu) {
-    // from menu → load current song’s model and start playing
-    await loadModelAtIndex(current);
-    inMenu = false;
-    loadTrack(current, true);
-  } else {
-    // already on a song model → just toggle audio
-    if (!player.buffer) { 
-      loadTrack(current, true); 
-    } else if (player.isPlaying) {
-      player.pause();
-    } else {
-      player.play();
-    }
-  }
-  updatePPIcon();
-});
-
-  byId('nextBtn')     ?.addEventListener('click', async () => { await cycle(+1, true); });
-});
-
-
-// Keyboard
-window.addEventListener('keydown', async (e) => {
-  // don’t hijack typing in inputs
-  const tag = (e.target && e.target.tagName) || '';
-  if (/(INPUT|TEXTAREA|SELECT|BUTTON)/.test(tag)) return;
-
-  if (e.code === 'Space') {
-    e.preventDefault(); // prevent page from scrolling
+  // PLAY/PAUSE:
+  $('playPauseBtn')?.addEventListener('click', async () => {
     if (inMenu) {
-      await loadModelAtIndex(current); // load first song model (current=0 initially)
-      inMenu = false;
-      loadTrack(current, true);        // start audio
+      // From menu → load vinyl and start playing
+      await loadVinylModelAndPlay(true);
     } else {
+      // Already on vinyl model → toggle audio
       if (!player.buffer) {
-        loadTrack(current, true);      // first play on a song model
+        loadTrack(true);
       } else if (player.isPlaying) {
         player.pause();
       } else {
         player.play();
       }
     }
-    updatePPIcon();
-  } else if (e.code === 'ArrowRight') {
-    e.preventDefault();
-    await cycle(+1, true);
-  } else if (e.code === 'ArrowLeft') {
-    e.preventDefault();
-    await cycle(-1, true);
-  }
+    updatePlayPauseIcon();
+  });
 });
 
+// --- Keyboard (Space toggles; Arrow keys disabled since no playlist) ---
+window.addEventListener('keydown', async (e) => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (/(INPUT|TEXTAREA|SELECT|BUTTON)/.test(tag)) return;
 
-// Raycasting Logic
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-window.addEventListener('click', (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = (event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(clickableButtons);
-
-  if (intersects.length > 0) {
-    const clicked = intersects[0].object;
-    const buttonName = clicked.parent.name.toLowerCase();
-
-    switch(buttonName){
-      case 'playbutton':
-        if (audio.isPlaying) {
-          audio.pause();
-        } else {
-          audio.play();
-        }
-        break;
-
-      case 'forwardbutton':
-        currentTrack = (currentTrack + 1) % songs.length;
-        updateScreenTexture(screens[currentTrack]);
-        setupAudio(songs[currentTrack]);
-        break;
-
-      case 'rewindbutton':
-        currentTrack = (currentTrack - 1) % songs.length;
-        updateScreenTexture(screens[currentTrack]);
-        setupAudio(songs[currentTrack]);
-        break;
-
-        default:
-          console.warn('Clicked object not assigned a control:', buttonName);
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (inMenu) {
+      await loadVinylModelAndPlay(true);
+    } else {
+      if (!player.buffer) {
+        loadTrack(true);
+      } else if (player.isPlaying) {
+        player.pause();
+      } else {
+        player.play();
+      }
     }
+    updatePlayPauseIcon();
   }
 });
 
-// Resize handler
+// --- Resize ---
 function onWindowResize() {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-
-  camera.aspect = width / height;
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
+  renderer.setSize(w, h);
 }
+window.addEventListener('resize', onWindowResize);
 
-// Attach the resize event
-window.addEventListener('resize', onWindowResize, false);
-
-// Animation loop
+// --- Loop ---
 function animate() {
   requestAnimationFrame(animate);
-
-  // Update animation if any
-  if (mixer) {
-    mixer.update(clock.getDelta());
-  }
-
+  if (mixer) mixer.update(clock.getDelta());
   renderer.render(scene, camera);
 }
-
-// Start the animation loop
 animate();
 
-// Initial Load
-// Load first model and prepare its audio (no autoplay to respect gesture rules)
+// --- Initial load: show Menu, do NOT autoplay (gesture rules) ---
 (async () => {
-  await loadMenuModel();      
+  await loadMenuModel();
+  updatePlayPauseIcon();
 })();
