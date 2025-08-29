@@ -4,8 +4,8 @@ let loadedModel;
 let inMenu = true;
 
 // --- Models ---
-const MENU_MODEL  = 'assets/models/vinylPlayer2.glb';        // your menu “splash”
-const VINYL_MODEL = 'assets/models/vinylPlayer2.glb'; // your turntable model
+const MENU_MODEL  = 'assets/models/vinylPlayer3.glb';       
+const VINYL_MODEL = 'assets/models/vinylPlayer3.glb'; 
 
 // --- Single Track ---
 const TRACK_URL = 'assets/audio/never-too-much-luther-van.mp3';
