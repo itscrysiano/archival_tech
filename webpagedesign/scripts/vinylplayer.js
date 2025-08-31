@@ -32,8 +32,13 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.update();
 
+canvas.addEventListener("wheel", (event) => {
+event.stopPropagation();
+}, { passive: false });
+
 // Light
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
+
 
 // Audio
 const listener    = new THREE.AudioListener();
