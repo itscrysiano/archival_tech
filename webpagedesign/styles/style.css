@@ -156,3 +156,8 @@ body {
   color: #fff;
   border-color: var(--brand);
 }
+
+html {
+  overflow-y: scroll;
+}
+

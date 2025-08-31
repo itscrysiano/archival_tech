@@ -1,37 +1,41 @@
-// --- Core THREE globals ---
 let renderer, clock, camera, scene, mixer;
 let loadedModel;
 let inMenu = true;
 
-// --- Models ---
+
 const MENU_MODEL  = 'assets/models/vinylPlayer3.glb';       
 const VINYL_MODEL = 'assets/models/vinylPlayer3.glb'; 
 
-// --- Single Track ---
+
 const TRACK_URL = 'assets/audio/never-too-much-luther-van.mp3';
 
-// --- Canvas / Clock / Renderer ---
+
 const canvas = document.getElementById('threeContainer');
+
+// Clock
 clock = new THREE.Clock();
 
+// Renderer
 renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-// --- Scene / Camera / Controls ---
+// Scene
 scene = new THREE.Scene();
 
+// Camera
 camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 0, 10);
 
+// Controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.update();
 
-// --- Light ---
+// Light
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
 
-// --- Audio ---
+// Audio
 const listener    = new THREE.AudioListener();
 camera.add(listener);
 const player      = new THREE.Audio(listener);
@@ -39,12 +43,12 @@ const audioLoader = new THREE.AudioLoader();
 
 const bufferCache = new Map();
 
-// Make sure WebAudio can play after first user gesture
+// WebAudio
 window.addEventListener('pointerdown', () => {
   if (listener.context.state !== 'running') listener.context.resume();
 }, { once: true });
 
-// --- Helpers ---
+
 function disposeObject3D(obj) {
   obj.traverse((o) => {
     if (o.isMesh) {
@@ -66,7 +70,7 @@ function centerModel(root) {
   root.position.sub(center);
 }
 
-// --- Audio control ---
+// Audio Controls
 function setAndMaybePlay(buffer, autoplay) {
   if (player.isPlaying && player.source) player.stop();
   player.setBuffer(buffer);
@@ -90,7 +94,7 @@ function loadTrack(autoplay = false) {
   }
 }
 
-// --- Model loading ---
+// Model loader
 const gltfLoader = new THREE.GLTFLoader();
 
 async function loadModel(path) {
@@ -156,16 +160,15 @@ function frameObject(object, fitOffset = 1.2) {
   camera.far  = distance * 50;
   camera.updateProjectionMatrix();
 
-  // If your model sits on the ground, you can add a slight upward offset here if desired
 }
 
 
-// --- UI wiring ---
+// UI wiring
 function updatePlayPauseIcon() {
   const icon = document.getElementById('playPauseIcon');
   if (!icon) return;
   const playing = !!player.isPlaying;
-  // Use the same asset if you don’t have separate icons yet
+  
   icon.src = 'assets/buttons/playpause.png';
   icon.dataset.state = playing ? 'playing' : 'paused';
 }
@@ -173,12 +176,19 @@ function updatePlayPauseIcon() {
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
-  // MENU: go back to menu model and pause audio
-  $('menuBtn')?.addEventListener('click', async () => {
-    await loadMenuModel();
-    if (player.isPlaying) player.pause();
-    updatePlayPauseIcon();
-  });
+  
+// STOP:
+$('stopBtn')?.addEventListener('click', async () => {
+  await loadMenuModel();   // go back to menu model if you want that behavior
+  if (player.isPlaying) {
+    player.stop();         // stop and reset
+  } else {
+    // even if not playing, make sure it's reset
+    player.stop();
+  }
+  updatePlayPauseIcon();
+});
+
 
   // PLAY/PAUSE:
   $('playPauseBtn')?.addEventListener('click', async () => {
@@ -199,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// --- Keyboard (Space toggles; Arrow keys disabled since no playlist) ---
+// Keyboard
 window.addEventListener('keydown', async (e) => {
   const tag = (e.target && e.target.tagName) || '';
   if (/(INPUT|TEXTAREA|SELECT|BUTTON)/.test(tag)) return;
@@ -221,7 +231,7 @@ window.addEventListener('keydown', async (e) => {
   }
 });
 
-// --- Resize ---
+// Resize Handler
 function onWindowResize() {
   const w = window.innerWidth, h = window.innerHeight;
   camera.aspect = w / h;
@@ -230,7 +240,7 @@ function onWindowResize() {
 }
 window.addEventListener('resize', onWindowResize);
 
-// --- Loop ---
+// Loop
 function animate() {
   requestAnimationFrame(animate);
   if (mixer) mixer.update(clock.getDelta());
@@ -238,7 +248,7 @@ function animate() {
 }
 animate();
 
-// --- Initial load: show Menu, do NOT autoplay (gesture rules) ---
+// Inital Load
 (async () => {
   await loadMenuModel();
   updatePlayPauseIcon();
