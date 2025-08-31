@@ -96,7 +96,6 @@ canvas {
   width: 100%;
   max-width: 500px;
   max-height: 500px;
-  /* height: 60vh; /* or 80vh / 100vh depending on how much space you want it to take */
   display: block;
   margin: 0 auto;
 }
