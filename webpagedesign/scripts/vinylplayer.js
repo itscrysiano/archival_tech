@@ -39,6 +39,11 @@ event.stopPropagation();
 // Light
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
 
+const dirLight = new THREE.DirectionalLight(0xffffff, 1); 
+dirLight.position.set(30, -35, 10);
+dirLight.castShadow = false;
+scene.add(dirLight);
+
 
 // Audio
 const listener    = new THREE.AudioListener();
