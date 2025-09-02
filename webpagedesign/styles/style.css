@@ -1,19 +1,12 @@
 
-/* fonts and colors */
-:root{
-  --font-body: "Open Sans", sans-serif;
-  --font-heading: "Helvetica Neue", sans-serif;
-
-  --bg: #e6f2ff;
-  --ink: #1a1a1a;
-  --brand: #3f51b5;
-  --shadow: 0 12px 28px rgba(0,0,0,.08);
-  --radius: 10px;
-
-
-  /* make Bootstrap use our body font */
-  --bs-body-font-family: var(--font-body);
+#threeContainer {
+  width: 100%;
+  max-width: 1450px;
+  max-height: 5000px;
+  display: block;
+  margin: 0 auto;
 }
+
 
 /* heading */
 h1, h2, h3, h4, h5, h6,
@@ -47,7 +40,7 @@ h1, h2, h3, h4, h5, h6,
 
 .dropdown-menu
 .dropdown-item {
-    color: #ffffff; 
+    color: #030303; 
 }
 
 .dropdown-menu
@@ -92,13 +85,7 @@ canvas {
     padding-top: 0px;
 }
 
-#threeContainer {
-  width: 100%;
-  max-width: 500px;
-  max-height: 500px;
-  display: block;
-  margin: 0 auto;
-}
+
 
 
 button {
